@@ -1,0 +1,27 @@
+# Copie para terraform.tfvars e troque os valores:
+#   cp terraform.tfvars.example terraform.tfvars
+# O terraform.tfvars está no .gitignore: não vai para o Git.
+
+# Account Console > menu do usuário (canto superior direito). Formato UUID.
+databricks_account_id = "00000000-0000-0000-0000-000000000000"
+
+# Profiles de autenticação (nenhum segredo aqui, só o NOME do profile).
+aws_profile                = "meu-profile-aws"
+databricks_account_profile = "workshop-account"
+
+# Prefixo dos nomes na AWS e no Account Console. Use "food" para o projeto
+# Food Intelligence; assim nada colide com as peças "workshop" do ensaio manual.
+prefix = "food"
+
+# Workspaces a criar (default: DEV e PROD). Cada um tem a sua VPC e o seu NAT Gateway
+# (~US$ 1,20/dia parado). 3 ambientes: inclua hml = "FOOD-HML". Para estudar: só dev.
+# environments = { dev = "FOOD-DEV", prod = "FOOD-PROD" }
+
+# Opcionais (estes são os defaults).
+# region             = "us-east-2"
+# enable_file_events = false
+# tags = {
+#   Projeto       = "setup-databricks-profissional"
+#   Evento        = "workshop-jornada-de-dados"
+#   GerenciadoPor = "terraform"
+# }

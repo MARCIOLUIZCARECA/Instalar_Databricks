@@ -1,0 +1,20 @@
+# Diretório de providers baixados pelo `terraform init`
+.terraform/
+
+# State: contém IDs e ARNs reais da sua conta
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+
+# Variáveis reais (o .example continua versionado)
+*.tfvars
+*.tfvars.json
+!terraform.tfvars.example
+
+# Overrides locais
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

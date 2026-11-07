@@ -1,0 +1,29 @@
+# Databricks App "Food Intelligence Explorer" (Streamlit).
+# Depois do deploy, inicie com:  databricks bundle run food_explorer -t <target>
+
+resources:
+  apps:
+    food_explorer:
+      name: ${var.app_name}
+      description: Food Intelligence Explorer — vendas por loja e período (camada Gold)
+      source_code_path: ../app
+
+      config:
+        command: ["streamlit", "run", "app.py"]
+        env:
+          - name: DATABRICKS_WAREHOUSE_ID
+            value_from: sql-warehouse
+          - name: FOOD_CATALOG
+            value: ${var.catalog}
+
+      # O App só ganha "usar o warehouse". Acesso a dados é Unity Catalog.
+      resources:
+        - name: sql-warehouse
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE
+
+      # Autorização de usuário: as consultas rodam com a identidade de quem usa.
+      # Exige que um admin do workspace habilite "user authorization" (Public Preview).
+      user_api_scopes:
+        - sql

@@ -1,0 +1,10 @@
+# Configuração usada quando o App é publicado SEM o bundle (databricks apps deploy).
+# Pelo bundle, command e env vêm de resources/food_explorer.app.yml (config:),
+# com o catálogo certo de cada ambiente.
+command: ["streamlit", "run", "app.py"]
+
+env:
+  - name: DATABRICKS_WAREHOUSE_ID
+    valueFrom: sql-warehouse
+  - name: FOOD_CATALOG
+    value: food_prod

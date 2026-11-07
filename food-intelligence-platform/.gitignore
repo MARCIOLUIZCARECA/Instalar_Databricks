@@ -1,0 +1,10 @@
+# Dados gerados localmente (python data/generate_orders.py)
+data/output/
+
+# Estado local do bundle
+.databricks/
+
+# Python
+__pycache__/
+.pytest_cache/
+.venv/

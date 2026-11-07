@@ -1,0 +1,28 @@
+# cp terraform.tfvars.example terraform.tfvars   (o .tfvars real não vai para o Git)
+
+databricks_account_id = "00000000-0000-0000-0000-000000000000"
+aws_profile           = "meu-profile-aws" # a MESMA conta AWS do stack ../../../terraform
+
+# Output workspace_ids do stack ../../../terraform  (terraform output workspace_ids)
+# hml é opcional: com 2 ambientes, deixe só dev e prod.
+workspace_ids = {
+  dev  = 0
+  # hml = 0
+  prod = 0
+}
+
+# Profiles de workspace (databricks auth login --host <url> --profile food-dev ...)
+# workspace_profiles = { dev = "food-dev", hml = "food-hml", prod = "food-prod" }
+
+# Você (e outros instrutores) no grupo platform-admins.
+platform_admins = ["voce@empresa.com"]
+
+# Usuários fictícios: e-mail => grupo. Com plus-addressing você recebe os convites
+# no seu próprio e-mail e consegue logar com cada perfil.
+demo_users = {
+  "voce+admin@empresa.com"       = "platform-admins"
+  "voce+engenheiro@empresa.com"  = "data-engineering"
+  "voce+marketing@empresa.com"   = "marketing-team"
+  "voce+operacional@empresa.com" = "operations-team"
+  "voce+diretor@empresa.com"     = "executives"
+}

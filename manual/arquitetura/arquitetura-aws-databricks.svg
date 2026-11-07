@@ -1,0 +1,270 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1040" viewBox="0 0 1600 1040" font-family="-apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif">
+  <title>Arquitetura: workspace Databricks clássico na AWS</title>
+  <defs>
+    <style>
+      .t12 { font-size: 12px; fill: #37474F; }
+      .t13 { font-size: 13px; fill: #263238; }
+      .b { font-weight: 700; }
+      .h14 { font-size: 14px; font-weight: 700; fill: #1F2A33; }
+      .h16 { font-size: 16px; font-weight: 700; fill: #1F2A33; }
+      .mono { font-family: Menlo, Consolas, 'Courier New', monospace; font-size: 12px; fill: #5D4037; }
+      .muted { fill: #607D8B; }
+      .cost { font-size: 12px; font-weight: 700; fill: #C62828; }
+      .why { font-size: 12px; font-weight: 700; fill: #8A4B00; }
+      .flowlbl { font-size: 12px; font-weight: 700; fill: #263238; }
+      .flowred { font-size: 12px; font-weight: 700; fill: #C4271A; }
+      .you { fill: #FFF4E0; stroke: #FF9900; stroke-width: 2; }
+      .auto { fill: #F4F6F8; stroke: #6B7785; stroke-width: 1.6; stroke-dasharray: 7 5; }
+      .autoin { fill: #FFFFFF; stroke: #8D99A6; stroke-width: 1.2; stroke-dasharray: 5 4; }
+      .ec2 { fill: #E3E8EE; stroke: #6B7785; stroke-width: 1.2; }
+      .dbx { fill: #FFFFFF; stroke: #FF3621; stroke-width: 1.5; }
+      .item { fill: #FFF3F0; stroke: #F4A493; stroke-width: 1; }
+      .net { fill: none; stroke: #37474F; stroke-width: 2.2; }
+      .assume { fill: none; stroke: #E0301E; stroke-width: 2.4; }
+    </style>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#37474F"/>
+    </marker>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#E0301E"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1600" height="1040" fill="#FFFFFF"/>
+
+  <!-- Título -->
+  <text x="20" y="40" font-size="26" font-weight="700" fill="#1F2A33">Workspace Databricks clássico na AWS: o que criamos e por quê</text>
+  <text x="20" y="66" class="t13 muted">Setup Plataforma Databricks Profissional do Zero · Jornada de Dados · região us-east-2 (Ohio)</text>
+
+  <!-- ===================== Usuário ===================== -->
+  <rect x="20" y="170" width="130" height="132" rx="10" fill="#FFFFFF" stroke="#90A4AE" stroke-width="1.5"/>
+  <circle cx="85" cy="200" r="12" fill="#90A4AE"/>
+  <path d="M63,236 a22,18 0 0 1 44,0 z" fill="#90A4AE"/>
+  <text x="85" y="258" class="h14" text-anchor="middle">Você</text>
+  <text x="85" y="275" class="t12" text-anchor="middle">navegador,</text>
+  <text x="85" y="290" class="t12" text-anchor="middle">API ou CLI</text>
+
+  <!-- ===================== Conta Databricks ===================== -->
+  <rect x="190" y="85" width="420" height="715" rx="14" fill="#FFF3F0" stroke="#FF3621" stroke-width="2"/>
+  <path d="M204,85 h392 a14,14 0 0 1 14,14 v36 h-420 v-36 a14,14 0 0 1 14,-14 z" fill="#FF3621"/>
+  <text x="400" y="108" font-size="17" font-weight="700" fill="#FFFFFF" text-anchor="middle">CONTA DATABRICKS</text>
+  <text x="400" y="126" font-size="12" fill="#FFFFFF" text-anchor="middle">roda na conta AWS da Databricks (414351767826)</text>
+
+  <!-- Control Plane -->
+  <rect x="210" y="150" width="380" height="375" rx="10" class="dbx"/>
+  <text x="230" y="174" class="h16">Control Plane</text>
+  <text x="230" y="192" class="t12 muted">o “cérebro”: orquestra e governa</text>
+
+  <rect x="230" y="200" width="340" height="46" rx="6" class="item"/>
+  <text x="244" y="219" class="t13 b">Web app / UI · notebooks</text>
+  <text x="244" y="236" class="t12">onde você trabalha — fluxo (a)</text>
+
+  <rect x="230" y="265" width="340" height="46" rx="6" class="item"/>
+  <text x="244" y="284" class="t13 b">Jobs scheduler</text>
+  <text x="244" y="301" class="t12">agenda e dispara as execuções</text>
+
+  <rect x="230" y="330" width="340" height="46" rx="6" class="item"/>
+  <text x="244" y="349" class="t13 b">Cluster manager</text>
+  <text x="244" y="366" class="t12">pede à AWS (via ③) para criar EC2 — (b)</text>
+
+  <rect x="230" y="395" width="340" height="46" rx="6" class="item"/>
+  <text x="244" y="414" class="t13 b">Unity Catalog — metastore</text>
+  <text x="244" y="431" class="t12">metastore_aws_us_east_2 · usa ② — (e)</text>
+
+  <rect x="230" y="460" width="340" height="46" rx="6" class="item"/>
+  <text x="244" y="479" class="t13 b">Relay de conexão segura</text>
+  <text x="244" y="496" class="t12">recebe a conexão de saída dos clusters — (c)</text>
+
+  <!-- Account Console -->
+  <rect x="210" y="545" width="380" height="240" rx="10" class="dbx"/>
+  <text x="230" y="569" class="h16">Account Console</text>
+  <text x="230" y="587" class="t12">accounts.cloud.databricks.com</text>
+  <text x="230" y="603" class="t12">Account ID bee83b2f-… (usado como External ID)</text>
+
+  <rect x="230" y="616" width="340" height="30" rx="5" class="item"/>
+  <text x="242" y="636" class="t13 b">Credential configuration</text>
+  <text x="560" y="636" class="t12" text-anchor="end">→ ③ cross-account</text>
+
+  <rect x="230" y="652" width="340" height="30" rx="5" class="item"/>
+  <text x="242" y="672" class="t13 b">Storage configuration</text>
+  <text x="560" y="672" class="t12" text-anchor="end">→ ① bucket + ② role</text>
+
+  <rect x="230" y="688" width="340" height="30" rx="5" class="item"/>
+  <text x="242" y="708" class="t13 b">Network configuration</text>
+  <text x="560" y="708" class="t12" text-anchor="end">→ ④ VPC</text>
+
+  <rect x="230" y="724" width="340" height="30" rx="5" fill="#FF3621"/>
+  <text x="242" y="744" font-size="13" font-weight="700" fill="#FFFFFF">Workspace</text>
+  <text x="560" y="744" font-size="12" fill="#FFFFFF" text-anchor="end">= ③ + ①② + ④ + metastore</text>
+
+  <text x="230" y="775" class="t12 muted" font-style="italic">cada objeto só aponta para algo que já existe na AWS</text>
+
+  <!-- ===================== Conta AWS do cliente ===================== -->
+  <rect x="700" y="85" width="880" height="715" rx="14" fill="#FFFCF7" stroke="#FF9900" stroke-width="2"/>
+  <path d="M714,85 h852 a14,14 0 0 1 14,14 v36 h-880 v-36 a14,14 0 0 1 14,-14 z" fill="#232F3E"/>
+  <text x="1140" y="108" font-size="17" font-weight="700" fill="#FFFFFF" text-anchor="middle">SUA CONTA AWS (459800357476) — Classic Compute Plane</text>
+  <text x="1140" y="126" font-size="12" fill="#FFB84D" text-anchor="middle">aqui ficam o processamento (EC2) e os dados (S3) · região us-east-2</text>
+
+  <text x="720" y="156" font-size="13" font-weight="700" fill="#B36B00">VOCÊ CRIA ANTES DO WORKSPACE</text>
+
+  <!-- ③ cross-account role -->
+  <rect x="720" y="165" width="260" height="200" rx="10" class="you"/>
+  <circle cx="743" cy="191" r="13" fill="#FF9900"/>
+  <text x="743" y="196" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">3</text>
+  <text x="764" y="196" class="h14">IAM role cross-account</text>
+  <text x="736" y="220" class="mono">databricks-workshop-</text>
+  <text x="736" y="235" class="mono">cross-account-role</text>
+  <text x="736" y="257" class="t12">Trust: conta Databricks</text>
+  <text x="736" y="273" class="t12">(414351767826) + External ID</text>
+  <text x="736" y="293" class="t12">Policy: ações EC2 para criar e</text>
+  <text x="736" y="309" class="t12">gerenciar VPC, subnets, SG e EC2</text>
+  <text x="736" y="333" class="why">Por quê? Sem ela, nenhum</text>
+  <text x="736" y="349" class="why">cluster consegue ligar.</text>
+
+  <!-- ② storage role -->
+  <rect x="1010" y="165" width="260" height="200" rx="10" class="you"/>
+  <circle cx="1033" cy="191" r="13" fill="#FF9900"/>
+  <text x="1033" y="196" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">2</text>
+  <text x="1054" y="196" class="h14">IAM role de storage (UC)</text>
+  <text x="1026" y="220" class="mono">databricks-workshop-</text>
+  <text x="1026" y="235" class="mono">storage-role</text>
+  <text x="1026" y="257" class="t12">Trust: UCMasterRole da Databricks</text>
+  <text x="1026" y="273" class="t12">+ self-assume · External ID</text>
+  <text x="1026" y="293" class="t12">Policy: S3 em unity-catalog/*</text>
+  <text x="1026" y="309" class="t12">(opcional: file events SNS/SQS)</text>
+  <text x="1026" y="333" class="why">Por quê? Credencial do Unity</text>
+  <text x="1026" y="349" class="why">Catalog para ler/gravar no ①.</text>
+
+  <!-- ① bucket -->
+  <rect x="1300" y="165" width="260" height="200" rx="10" class="you"/>
+  <circle cx="1323" cy="191" r="13" fill="#FF9900"/>
+  <text x="1323" y="196" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">1</text>
+  <text x="1344" y="196" class="h14">Bucket S3 raiz</text>
+  <text x="1316" y="220" class="mono">databricks-workshop-</text>
+  <text x="1316" y="235" class="mono">root-&lt;id&gt;</text>
+  <text x="1316" y="257" class="t12">Policy: Databricks lê/grava;</text>
+  <text x="1316" y="273" class="t12">Deny do DBFS em unity-catalog/</text>
+  <text x="1316" y="293" class="t12">Guarda: logs, resultados, DBFS</text>
+  <text x="1316" y="309" class="t12">root e unity-catalog/ (catálogo)</text>
+  <text x="1316" y="333" class="why">Por quê? Armazenamento raiz</text>
+  <text x="1316" y="349" class="why">do workspace e do catálogo.</text>
+
+  <!-- ② → ① -->
+  <line x1="1272" y1="300" x2="1297" y2="300" class="assume" marker-end="url(#ar)"/>
+
+  <!-- ④ Databricks-managed VPC -->
+  <rect x="720" y="440" width="840" height="345" rx="12" class="auto"/>
+  <circle cx="832" cy="466" r="12" fill="#6B7785"/>
+  <text x="832" y="471" font-size="13" font-weight="700" fill="#FFFFFF" text-anchor="middle">4</text>
+  <text x="852" y="471" class="h14">Databricks-managed VPC — criada automaticamente via ③</text>
+  <text x="820" y="490" class="t12">quando o workspace sobe: VPC, subnets, security group, IGW, NAT e route tables</text>
+
+  <!-- Internet Gateway -->
+  <rect x="705" y="455" width="100" height="56" rx="8" class="autoin" style="fill:#FFFFFF"/>
+  <text x="755" y="478" class="t13 b" text-anchor="middle">Internet</text>
+  <text x="755" y="496" class="t13 b" text-anchor="middle">Gateway</text>
+
+  <!-- Subnet pública -->
+  <rect x="830" y="505" width="250" height="135" rx="8" class="autoin"/>
+  <text x="845" y="525" class="t13 b">Subnet pública</text>
+  <rect x="845" y="537" width="220" height="73" rx="6" class="ec2"/>
+  <text x="857" y="557" class="t13 b">NAT Gateway + Elastic IP</text>
+  <text x="857" y="575" class="t12">saída dos clusters p/ internet</text>
+  <text x="857" y="597" class="cost">$ cobra por hora</text>
+
+  <!-- Subnets privadas -->
+  <rect x="1100" y="505" width="445" height="200" rx="8" class="autoin"/>
+  <text x="1115" y="525" class="t13 b">Subnets privadas</text>
+  <rect x="1115" y="537" width="415" height="157" rx="6" fill="none" stroke="#8D99A6" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <text x="1125" y="554" class="t12 muted">Security group</text>
+  <rect x="1130" y="565" width="120" height="60" rx="6" class="ec2"/>
+  <text x="1190" y="590" class="t13 b" text-anchor="middle">EC2</text>
+  <text x="1190" y="608" class="t12" text-anchor="middle">Driver</text>
+  <rect x="1265" y="565" width="120" height="60" rx="6" class="ec2"/>
+  <text x="1325" y="590" class="t13 b" text-anchor="middle">EC2</text>
+  <text x="1325" y="608" class="t12" text-anchor="middle">Worker</text>
+  <rect x="1400" y="565" width="115" height="60" rx="6" class="ec2"/>
+  <text x="1457" y="590" class="t13 b" text-anchor="middle">EC2</text>
+  <text x="1457" y="608" class="t12" text-anchor="middle">Worker</text>
+  <text x="1130" y="648" class="t12">Cluster: criado quando alguém liga um cluster</text>
+  <text x="1130" y="666" class="cost">$ EC2 por hora (+ DBUs da Databricks)</text>
+  <text x="1130" y="684" class="t12 muted">some quando o cluster é encerrado</text>
+
+  <!-- Route tables -->
+  <rect x="720" y="655" width="360" height="52" rx="8" class="autoin"/>
+  <text x="735" y="677" class="t13 b">Route tables</text>
+  <text x="735" y="696" class="t12">privada → NAT · pública → Internet Gateway</text>
+
+  <!-- Alerta de custo -->
+  <rect x="720" y="720" width="825" height="55" rx="8" fill="#FDECEA" stroke="#D93F21" stroke-width="1.2"/>
+  <text x="735" y="742" class="t13"><tspan class="b" fill="#C62828">Atenção ao custo:</tspan> NAT Gateway (+ Elastic IP) e instâncias EC2 cobram por hora, mesmo sem uso.</text>
+  <text x="735" y="762" class="t13">Na limpeza: encerre os clusters, delete o workspace e confira se NAT, EIP e VPC sumiram.</text>
+
+  <!-- ===================== Fluxos ===================== -->
+  <!-- (a) usuário → UI -->
+  <line x1="150" y1="223" x2="228" y2="223" class="net" marker-end="url(#ag)"/>
+  <text x="170" y="214" class="flowlbl" text-anchor="middle">(a)</text>
+
+  <!-- (b) cluster manager → ③ -->
+  <line x1="570" y1="353" x2="718" y2="353" class="assume" marker-end="url(#ar)"/>
+  <text x="655" y="327" class="flowred" text-anchor="middle">(b) assume ③</text>
+  <text x="655" y="342" class="flowred" text-anchor="middle">+ External ID</text>
+  <!-- ③ → ④ -->
+  <line x1="760" y1="365" x2="760" y2="438" class="assume" marker-end="url(#ar)"/>
+  <text x="768" y="392" class="flowred">(b) cria ④</text>
+
+  <!-- (e) UC → ② -->
+  <polyline points="570,418 1140,418 1140,368" class="assume" marker-end="url(#ar)"/>
+  <text x="1130" y="394" class="flowred" text-anchor="end">(e) UC assume ② → ①/unity-catalog/</text>
+  <text x="1130" y="410" class="flowred" text-anchor="end">via AssumeRole + External ID</text>
+
+  <!-- (c) cluster → NAT → IGW → relay -->
+  <line x1="1130" y1="590" x2="1067" y2="590" class="net" marker-end="url(#ag)"/>
+  <polyline points="845,575 785,575 785,513" class="net" marker-end="url(#ag)"/>
+  <line x1="705" y1="483" x2="572" y2="483" class="net" marker-end="url(#ag)"/>
+  <text x="655" y="474" class="flowlbl" text-anchor="middle">(c) conexão</text>
+  <text x="655" y="500" class="flowlbl" text-anchor="middle">de saída</text>
+
+  <!-- (d) cluster ↔ bucket -->
+  <line x1="1490" y1="563" x2="1490" y2="367" class="net" marker-start="url(#ag)" marker-end="url(#ag)"/>
+  <text x="1482" y="394" class="flowlbl" text-anchor="end">(d) lê/grava</text>
+  <text x="1482" y="410" class="flowlbl" text-anchor="end">dados no ①</text>
+
+  <!-- ===================== Rodapé ===================== -->
+  <!-- Legenda -->
+  <rect x="20" y="815" width="520" height="180" rx="10" fill="#FFFFFF" stroke="#B0BEC5"/>
+  <text x="36" y="840" class="h14">Legenda</text>
+  <rect x="36" y="852" width="34" height="20" rx="4" class="you"/>
+  <text x="82" y="867" class="t13">Você cria manualmente (①②③)</text>
+  <rect x="36" y="880" width="34" height="20" rx="4" class="auto"/>
+  <text x="82" y="895" class="t13">A Databricks cria automaticamente via ③ (④ e EC2)</text>
+  <rect x="36" y="908" width="34" height="20" rx="4" fill="#FFF3F0" stroke="#FF3621" stroke-width="2"/>
+  <text x="82" y="923" class="t13">Conta Databricks (Control Plane e Account Console)</text>
+  <line x1="36" y1="946" x2="68" y2="946" class="assume" marker-end="url(#ar)"/>
+  <text x="82" y="951" class="t13">Assume uma IAM role com External ID — (b), (e)</text>
+  <line x1="36" y1="974" x2="68" y2="974" class="net" marker-end="url(#ag)"/>
+  <text x="82" y="979" class="t13">Tráfego de rede / dados — (a), (c), (d) · <tspan class="cost">$</tspan> = custo por hora</text>
+
+  <!-- Fluxos -->
+  <rect x="560" y="815" width="520" height="180" rx="10" fill="#FFFFFF" stroke="#B0BEC5"/>
+  <text x="576" y="840" class="h14">Fluxos</text>
+  <text x="576" y="866" class="t13"><tspan class="b">(a)</tspan> Você → Control Plane: UI, notebooks, API (HTTPS)</text>
+  <text x="576" y="891" class="t13"><tspan class="b">(b)</tspan> Control Plane assume ③ (+ External ID) e cria ④ e EC2</text>
+  <text x="576" y="916" class="t13"><tspan class="b">(c)</tspan> Clusters → Control Plane: saída segura via NAT → IGW</text>
+  <text x="576" y="941" class="t13"><tspan class="b">(d)</tspan> Clusters ↔ bucket ①: logs, resultados, DBFS, tabelas</text>
+  <text x="576" y="966" class="t13"><tspan class="b">(e)</tspan> Unity Catalog assume ② → lê/grava ①/unity-catalog/</text>
+
+  <!-- Clássico x Serverless -->
+  <rect x="1100" y="815" width="480" height="180" rx="10" fill="#FFFFFF" stroke="#B0BEC5"/>
+  <text x="1116" y="840" class="h14">Clássico × Serverless</text>
+  <text x="1116" y="866" class="t13 b">Clássico (este workshop)</text>
+  <text x="1116" y="884" class="t12">compute (EC2) e dados (S3) ficam na SUA conta AWS</text>
+  <text x="1116" y="900" class="t12">→ você cria ①②③ e a rede ④ (ou deixa a Databricks criar).</text>
+  <text x="1116" y="926" class="t13 b">Serverless (workspace do trial)</text>
+  <text x="1116" y="944" class="t12">compute e storage rodam na conta da Databricks;</text>
+  <text x="1116" y="960" class="t12">nada é criado na sua conta AWS para o workspace.</text>
+  <text x="1116" y="982" class="t12 muted" font-style="italic">Mais simples, mas com menos controle de rede e dados.</text>
+
+  <!-- Nota de rodapé -->
+  <text x="20" y="1024" class="t12 muted"><tspan class="b">Nota:</tspan> a Databricks anunciou que vai descontinuar a Databricks-managed VPC para novos workspaces clássicos (sem data definida). O padrão profissional é a customer-managed VPC: você cria ④ e informa no Network configuration.</text>
+</svg>

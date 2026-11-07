@@ -1,0 +1,245 @@
+{
+  "version": 2,
+  "config": {
+    "sample_questions": [
+      {
+        "id": "13983eef4fee301d3355d69d03899682",
+        "question": [
+          "Qual é o ticket médio por loja?"
+        ]
+      },
+      {
+        "id": "1db31dd2cf171121a1ad31626cfd8137",
+        "question": [
+          "Como evoluíram as vendas nos últimos meses?"
+        ]
+      },
+      {
+        "id": "7f715f27e5dc4825c7fea45be21021d3",
+        "question": [
+          "Quais lojas tiveram queda de faturamento?"
+        ]
+      },
+      {
+        "id": "850ebc69e22575588ad037a063e91a27",
+        "question": [
+          "Qual estado possui maior volume de vendas?"
+        ]
+      },
+      {
+        "id": "8a230b68d492219e510b5ebf2a82ad83",
+        "question": [
+          "Qual foi o faturamento total no período?"
+        ]
+      },
+      {
+        "id": "9eab45b68ac049360806b0eae5156250",
+        "question": [
+          "Quais são as cinco lojas com maior faturamento?"
+        ]
+      },
+      {
+        "id": "ce964d44ada11ae763538bb36a5b850e",
+        "question": [
+          "Qual foi o volume de pedidos por região?"
+        ]
+      }
+    ]
+  },
+  "data_sources": {
+    "tables": [
+      {
+        "identifier": "food_prod.orders.gold_sales_by_store",
+        "column_configs": [
+          {
+            "column_name": "average_ticket",
+            "description": [
+              "Ticket médio do dia. Para períodos, recalcule com SUM/SUM."
+            ],
+            "synonyms": [
+              "ticket médio"
+            ]
+          },
+          {
+            "column_name": "city",
+            "description": [
+              "Cidade da loja."
+            ],
+            "synonyms": [
+              "cidade",
+              "município"
+            ],
+            "enable_format_assistance": true,
+            "enable_entity_matching": true
+          },
+          {
+            "column_name": "order_date",
+            "description": [
+              "Dia dos pedidos."
+            ],
+            "synonyms": [
+              "data",
+              "dia",
+              "período"
+            ]
+          },
+          {
+            "column_name": "region",
+            "description": [
+              "Região do Brasil."
+            ],
+            "synonyms": [
+              "região"
+            ],
+            "enable_format_assistance": true,
+            "enable_entity_matching": true
+          },
+          {
+            "column_name": "state",
+            "description": [
+              "UF da loja."
+            ],
+            "synonyms": [
+              "estado",
+              "UF"
+            ],
+            "enable_format_assistance": true,
+            "enable_entity_matching": true
+          },
+          {
+            "column_name": "store_id",
+            "description": [
+              "Código da loja."
+            ],
+            "synonyms": [
+              "código da loja",
+              "id da loja"
+            ]
+          },
+          {
+            "column_name": "store_name",
+            "description": [
+              "Nome da loja (marca + cidade)."
+            ],
+            "synonyms": [
+              "loja",
+              "restaurante",
+              "unidade"
+            ],
+            "enable_format_assistance": true,
+            "enable_entity_matching": true
+          },
+          {
+            "column_name": "total_orders",
+            "description": [
+              "Pedidos entregues no dia."
+            ],
+            "synonyms": [
+              "pedidos",
+              "volume",
+              "quantidade de pedidos"
+            ]
+          },
+          {
+            "column_name": "total_revenue",
+            "description": [
+              "Faturamento em R$ no dia."
+            ],
+            "synonyms": [
+              "faturamento",
+              "receita",
+              "vendas em R$"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "instructions": {
+    "text_instructions": [
+      {
+        "id": "e1403d6e7f5e9a4b9090db9056e5b08a",
+        "content": [
+          "Você responde perguntas de negócio sobre as vendas da rede Food Intelligence (delivery de comida).\n",
+          "Fonte única: a tabela gold_sales_by_store, com uma linha por loja por dia, só com pedidos ENTREGUES.\n",
+          "Faturamento = SUM(total_revenue), em reais (R$). Pedidos = SUM(total_orders).\n",
+          "Ticket médio = SUM(total_revenue) / SUM(total_orders). Nunca calcule a média da coluna average_ticket.\n",
+          "Volume de vendas significa quantidade de pedidos, salvo se o usuário falar em valor ou faturamento.\n",
+          "Região é a coluna region (Sudeste, Sul, Centro-Oeste, Nordeste, Norte); estado é a coluna state (UF).\n",
+          "Sem período informado, use todo o histórico disponível e diga qual foi o intervalo de datas.\n",
+          "'Últimos meses' = agrupar por mês com DATE_TRUNC('MONTH', order_date).\n",
+          "Queda de faturamento: compare o último mês completo com o primeiro mês do histórico por loja.\n",
+          "Responda em português do Brasil e formate valores como R$ com duas casas decimais."
+        ]
+      }
+    ],
+    "example_question_sqls": [
+      {
+        "id": "87299db93b0737615471e52c175083c7",
+        "question": [
+          "Qual é o ticket médio por loja?"
+        ],
+        "sql": [
+          "SELECT store_name, ROUND(SUM(total_revenue) / SUM(total_orders), 2) AS ticket_medio FROM food_prod.orders.gold_sales_by_store GROUP BY store_name ORDER BY ticket_medio DESC"
+        ]
+      },
+      {
+        "id": "95e3da02b5a7df66c3d6a5d8424901b6",
+        "question": [
+          "Quais são as cinco lojas com maior faturamento?"
+        ],
+        "sql": [
+          "SELECT store_name, SUM(total_revenue) AS faturamento FROM food_prod.orders.gold_sales_by_store GROUP BY store_name ORDER BY faturamento DESC LIMIT 5"
+        ]
+      },
+      {
+        "id": "dab1f3a42faf3b3ca0e4ccbe7f4e5743",
+        "question": [
+          "Quais lojas tiveram queda de faturamento?"
+        ],
+        "sql": [
+          "WITH m AS (SELECT store_name, DATE_TRUNC('MONTH', order_date) AS mes, SUM(total_revenue) AS fat FROM food_prod.orders.gold_sales_by_store GROUP BY ALL), lim AS (SELECT MIN(mes) AS primeiro, MAX(mes) AS ultimo FROM m) SELECT m1.store_name, m1.fat AS faturamento_inicial, m2.fat AS faturamento_final, ROUND((m2.fat - m1.fat) / m1.fat * 100, 1) AS variacao_pct FROM m m1 JOIN m m2 ON m1.store_name = m2.store_name CROSS JOIN lim WHERE m1.mes = lim.primeiro AND m2.mes = lim.ultimo AND m2.fat < m1.fat ORDER BY variacao_pct"
+        ]
+      }
+    ],
+    "sql_snippets": {
+      "measures": [
+        {
+          "id": "5810bee2bd585741dfaa82161f50ee20",
+          "alias": "faturamento",
+          "display_name": "Faturamento",
+          "sql": [
+            "SUM(gold_sales_by_store.total_revenue)"
+          ],
+          "synonyms": [
+            "receita",
+            "vendas em R$"
+          ]
+        },
+        {
+          "id": "996ec03d8589fbb6122564c825878bd7",
+          "alias": "pedidos",
+          "display_name": "Pedidos",
+          "sql": [
+            "SUM(gold_sales_by_store.total_orders)"
+          ],
+          "synonyms": [
+            "volume",
+            "quantidade de pedidos"
+          ]
+        },
+        {
+          "id": "f1245fa0a97cf1d75fe85521461c49ce",
+          "alias": "ticket_medio",
+          "display_name": "Ticket médio",
+          "sql": [
+            "SUM(gold_sales_by_store.total_revenue) / SUM(gold_sales_by_store.total_orders)"
+          ],
+          "synonyms": [
+            "ticket"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,128 @@
+# Declarative Automation Bundle (antigo Databricks Asset Bundle) do Food Intelligence.
+#
+# O MESMO código vai para cada ambiente; só a configuração muda:
+#
+#   databricks bundle deploy -t dev    # FOOD-DEV  -> catálogo food_dev
+#   databricks bundle deploy -t prod   # FOOD-PROD -> catálogo food_prod
+#
+# O target hml é OPCIONAL (3 ambientes): só funciona se existir o workspace
+# FOOD-HML, o profile food-hml e o catálogo food_hml.
+#
+# Cada target aponta para o profile do seu workspace
+# (databricks auth login --host <url> --profile food-dev ...).
+
+bundle:
+  name: food-intelligence
+
+include:
+  - resources/*.yml
+
+# Só código vai para o workspace: dados locais e Terraform ficam de fora.
+sync:
+  exclude:
+    - data/output/**
+    - infrastructure/**
+    - tests/**
+
+variables:
+  catalog:
+    description: Catálogo do ambiente (food_dev, food_hml, food_prod).
+    default: food_dev
+  reader_groups:
+    description: Grupos de negócio com SELECT na Gold (separados por vírgula). Só em PROD.
+    default: ""
+  warehouse_id:
+    description: SQL warehouse usado pelo Dashboard, pelo App e pelo Genie.
+    # Warehouse CLÁSSICO (roda na VPC da conta AWS). No ensaio de 06/11, o SQL
+    # warehouse SERVERLESS não conseguia ler os buckets do projeto (403 vindo do
+    # proxy de saída do serverless), enquanto o clássico e os jobs serverless
+    # funcionavam. Veja docs/troubleshooting.md.
+    # Numa conta sem esse bloqueio, troque para: Serverless Starter Warehouse
+    lookup:
+      warehouse: Food Classic Warehouse
+  app_name:
+    description: "Nome do App: letras minúsculas, números e hífen; até 30 caracteres."
+    default: food-explorer-dev
+
+targets:
+  dev:
+    default: true
+    # development: recursos ganham o prefixo "[dev <usuário>]" e agendamentos ficam pausados.
+    mode: development
+    workspace:
+      profile: food-dev
+    variables:
+      catalog: food_dev
+    resources:
+      genie_spaces:
+        food_business_analyst:
+          title: Food Business Analyst
+          description: Perguntas em linguagem natural sobre as vendas (camada Gold).
+          warehouse_id: ${var.warehouse_id}
+          file_path: ./genie/food_business_analyst.food_dev.geniespace.json
+
+  # HML (opcional) e PROD: mode production. O código fica numa pasta fora do "Shared"
+  # (só admins publicam) e quem não é admin só VÊ os recursos.
+  hml:
+    mode: production
+    workspace:
+      profile: food-hml
+      root_path: /Workspace/Projects/${bundle.name}/${bundle.target}
+    variables:
+      catalog: food_hml
+      app_name: food-explorer-hml
+    permissions:
+      - group_name: platform-admins
+        level: CAN_MANAGE
+      - group_name: data-engineering
+        level: CAN_VIEW
+
+  prod:
+    mode: production
+    workspace:
+      profile: food-prod
+      root_path: /Workspace/Projects/${bundle.name}/${bundle.target}
+    variables:
+      catalog: food_prod
+      reader_groups: marketing-team,operations-team,executives
+      app_name: food-explorer
+    permissions:
+      - group_name: platform-admins
+        level: CAN_MANAGE
+      - group_name: data-engineering
+        level: CAN_VIEW
+    # Consumo (seção 12): só existe em PROD para os grupos de negócio.
+    # Ver um painel ou usar o App/Genie NÃO dá acesso a dados: o SELECT na Gold
+    # continua sendo do Unity Catalog (notebooks/04_gold.py).
+    resources:
+      dashboards:
+        executive_overview:
+          permissions:
+            - group_name: marketing-team
+              level: CAN_RUN
+            - group_name: operations-team
+              level: CAN_RUN
+            - group_name: executives
+              level: CAN_RUN
+      apps:
+        food_explorer:
+          permissions:
+            - group_name: marketing-team
+              level: CAN_USE
+            - group_name: operations-team
+              level: CAN_USE
+            - group_name: executives
+              level: CAN_USE
+      genie_spaces:
+        food_business_analyst:
+          title: Food Business Analyst
+          description: Perguntas em linguagem natural sobre as vendas (camada Gold).
+          warehouse_id: ${var.warehouse_id}
+          file_path: ./genie/food_business_analyst.food_prod.geniespace.json
+          permissions:
+            - group_name: marketing-team
+              level: CAN_RUN
+            - group_name: operations-team
+              level: CAN_RUN
+            - group_name: executives
+              level: CAN_RUN

@@ -1,0 +1,15 @@
+# AI/BI Dashboard "Food Intelligence — Executive Overview".
+# As queries usam só o nome da tabela (FROM gold_sales_by_store);
+# o catálogo do ambiente entra por dataset_catalog / dataset_schema.
+
+resources:
+  dashboards:
+    executive_overview:
+      display_name: Food Intelligence — Executive Overview
+      file_path: ../dashboards/executive_overview.lvdash.json
+      warehouse_id: ${var.warehouse_id}
+      dataset_catalog: ${var.catalog}
+      dataset_schema: orders
+      # false: cada pessoa vê os dados com AS PRÓPRIAS permissões do Unity Catalog.
+      # (true faria todos verem com as permissões de quem publicou.)
+      embed_credentials: false

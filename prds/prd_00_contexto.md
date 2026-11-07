@@ -42,6 +42,25 @@ Se a conta AWS estiver numa **AWS Organization** (por exemplo, criada pela tela 
 
 **Antes de rodar qualquer comando, substitua os `{{NOME}}` pelos valores do `config.yaml`.** Se algum valor estiver vazio, pergunte; nunca invente.
 
+### 3.1 Regra dos nomes de catálogo (leia com atenção)
+
+Cada workspace tem **dois tipos** de catálogo, e os nomes se parecem:
+
+| Tipo | Nome | Quem cria | Usar? |
+|---|---|---|---|
+| **Catálogo do projeto** | `food_dev`, `food_prod` (sempre `food_<ambiente>`) | PRD 02 | **Sim: é o único que o projeto usa** |
+| **Catálogo automático** | o nome do workspace com `_` no lugar de `-` (ex.: `dev-food` → `dev_food`, `prod-food` → `prod_food`) | a Databricks, ao criar o workspace | **Nunca** |
+
+Com os workspaces `dev-food` e `prod-food`, os dois tipos ficam com as mesmas palavras em ordem trocada (`food_prod` × `prod_food`). É fácil escrever um no lugar do outro, e a consulta funciona sem erro, só que no catálogo errado, que fica no bucket raiz e não no lakehouse.
+
+Regras:
+
+1. **Todo código, SQL, job, dashboard, App e Genie usa `food_<ambiente>`**, vindo da variável `catalog` do bundle. Nunca o catálogo automático, nunca o nome escrito à mão.
+2. **Sempre o nome completo em três partes** (`food_prod.orders.gold_sales_by_store`). Não dependa do catálogo padrão do workspace.
+3. **Antes de encerrar qualquer PRD**, procure `{{WS_DEV}}` e `{{WS_PROD}}` com `_` (ex.: `dev_food`, `prod_food`) em todos os arquivos do projeto e nas consultas que você rodou. Se aparecer fora de uma explicação, corrija e avise.
+4. Em toda tabela de resumo para o aluno, escreva o nome do catálogo do projeto e, quando citar o automático, diga explicitamente "automático, não usado".
+5. **Ao criar workspaces novos**, prefira nomes que não repitam as palavras do catálogo do projeto (ex.: `{{PREFIXO}}-dev` e `{{PREFIXO}}-prod`, que geram `{{PREFIXO}}_dev` e `{{PREFIXO}}_prod`). Se os nomes já existirem, siga as regras 1 a 4.
+
 ## 4. Regras para o Claude Code
 
 1. **Aprovação antes de criar, alterar ou apagar.** Mostre o comando, diga em uma frase o que ele faz e espere o "pode". Leitura roda direto.
@@ -64,7 +83,7 @@ Se a conta AWS estiver numa **AWS Organization** (por exemplo, criada pela tela 
 | Formulário do console abriu em São Paulo | Sempre passar a região `{{REGIAO}}` explicitamente |
 | **Limite diário de criação de workspaces** na conta Databricks (apagar não libera) | Não criar workspaces de teste. Se falhar por limite, mostrar o erro e não contornar |
 | **Limite AWS de 5 VPCs e 5 Elastic IPs** por região | Conferir antes de criar workspace clássico |
-| Workspace novo ganha um **catálogo automático** com o nome dele (ex.: `prod_food`), que vira o catálogo padrão | Ajustar o catálogo padrão para `food_dev` / `food_prod` depois de criar os catálogos do projeto |
+| Workspace novo ganha um **catálogo automático** com o nome dele (ex.: `prod-food` → `prod_food`), que vira o catálogo padrão. No ao vivo, `prod_food` e `food_prod` foram trocados em alguns lugares | Seguir a seção 3.1: só `food_<ambiente>`, sempre em três partes; trocar o catálogo padrão; procurar o nome automático antes de encerrar cada PRD |
 | **SQL warehouse serverless com 403** nos buckets do projeto (suspeita: RCP da Organization) | Testar o serverless logo após a governança. Se der 403, usar um warehouse **clássico** PRO 2X-Small, auto-stop 10 min, chamado `Food Classic Warehouse` |
 | Genie exige a tabela Gold antes do deploy | `bundle deploy` → `bundle run` da pipeline → `bundle deploy` de novo |
 | SCP/RCP da Organization bloqueando a Databricks | Se aparecer `Failed credential validation checks` com policies corretas, investigar SCP/RCP antes de mexer nas roles |

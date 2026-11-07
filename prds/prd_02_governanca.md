@@ -54,7 +54,7 @@ Os catálogos ficam **isolados** (*workspace binding*): `food_dev` só aparece n
 
 | # | Passo | Mostrar no console |
 |---|---|---|
-| 0 | Leitura: grupos e catálogos existentes; o catálogo automático de cada workspace (`dev_food`, `prod_food`) | Account Console → User management; Catalog Explorer |
+| 0 | Leitura: grupos e catálogos existentes. Anote o **catálogo automático** de cada workspace (`{{WS_DEV}}` e `{{WS_PROD}}` com `_`): ele **não** é do projeto (PRD 00, seção 3.1) | Account Console → User management; Catalog Explorer |
 | 1 | Grupos e usuários na conta | Account Console → User management |
 | 2 | Atribuir grupos aos workspaces conforme a seção 3 | Account Console → Workspaces → Permissions |
 | 3 | Buckets raw e lakehouse (privados, SSE-S3, `{{REGIAO}}`) | S3 |
@@ -63,7 +63,8 @@ Os catálogos ficam **isolados** (*workspace binding*): `food_dev` só aparece n
 | 6 | Trust definitiva da role de dados (self-assuming, External ID da credential); esperar ~60 s; **Validate** da credential | IAM; Catalog Explorer |
 | 7 | External locations (as 4), com *Test connection* | Catalog Explorer → External locations |
 | 8 | Catálogos, schemas, volumes e grants da seção 3; workspace bindings | Catalog Explorer → Permissions / Workspaces |
-| 9 | Catálogo padrão de cada workspace → `food_dev` / `food_prod` | Workspace settings |
+| 9 | Catálogo padrão de cada workspace → `food_dev` / `food_prod` (o projeto, não o automático) | Workspace → Settings → Advanced → Default catalog |
+| 9b | **Opcional, com aprovação:** se o catálogo automático estiver vazio (só `default` e `information_schema`), apagá-lo, para não confundir na aula | Catalog Explorer |
 | 10 | **Teste do SQL warehouse serverless** lendo o volume `raw` de PROD. Se der 403, criar o `Food Classic Warehouse` (PRD 00, lições) | SQL Editor |
 
 ## 5. Lições específicas
@@ -71,6 +72,7 @@ Os catálogos ficam **isolados** (*workspace binding*): `food_dev` só aparece n
 - A role de dados é **outra role**, separada da storage role do workspace.
 - *Validate* da external location pode falhar em "file events": é normal sem a policy de SNS/SQS. Não é bloqueante.
 - Se o Terraform ou a API tentar criar um catálogo e ele já existir, **pare e pergunte**. Não apague catálogo com dados.
+- **`food_prod` ≠ `prod_food`.** O primeiro é o catálogo do projeto (lakehouse/prod); o segundo é o automático do workspace (bucket raiz). Releia o nome antes de cada GRANT, binding ou external location.
 
 ## 6. Critérios de aceite
 
@@ -78,6 +80,7 @@ Os catálogos ficam **isolados** (*workspace binding*): `food_dev` só aparece n
 - [ ] Marketing **não** entra no `{{WS_DEV}}`; entra no `{{WS_PROD}}`.
 - [ ] Storage credential validada (READ, LIST, WRITE, DELETE).
 - [ ] `food_dev` só no `{{WS_DEV}}`, `food_prod` só no `{{WS_PROD}}`.
+- [ ] Catálogo padrão = `food_dev` no DEV e `food_prod` no PROD, e nenhum GRANT ou binding feito no catálogo automático por engano.
 - [ ] Um SQL warehouse que lê o volume `raw` de PROD sem erro.
 - [ ] Tabela-resumo: grupo × workspace × catálogo × privilégio, e onde conferir cada um.
 

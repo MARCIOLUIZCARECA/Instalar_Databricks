@@ -2,7 +2,7 @@
 
 **Para quem lê:** o Claude Code. Leia antes o `prd_00_contexto.md`.
 
-**Pré-requisito:** `food_prod.orders.gold_sales_by_store` preenchida (PRD 05) e um SQL warehouse que lê a Gold (PRD 02, passo 10).
+**Pré-requisito:** `food_prod.orders.gold_sales_by_store` preenchida (catálogo do projeto `food_prod`, **não** o automático do workspace) (PRD 05) e um SQL warehouse que lê a Gold (PRD 02, passo 10).
 
 **Mensagem da aula:** *"a mesma Gold, três experiências; outra interface não é outra porta"*.
 
@@ -50,4 +50,5 @@ Ligue o warehouse uns 15 minutos antes da aula: desligado, ele leva de 2 a 5 min
 - [ ] App consultando a Gold com a identidade do usuário.
 - [ ] Genie respondendo as perguntas de exemplo em português, com o SQL certo.
 - [ ] As três lendo `food_prod.orders.gold_sales_by_store`.
+- [ ] Nenhum arquivo, consulta ou recurso do projeto usa o catálogo automático (`{{WS_DEV}}`/`{{WS_PROD}}` com `_`); tudo é `food_<ambiente>` em três partes (PRD 00, seção 3.1).
 - [ ] Com um usuário de marketing: Dashboard, App e Genie funcionam na Gold; ninguém lê a Silver por outra interface.

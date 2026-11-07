@@ -25,7 +25,7 @@ TEST é uma etapa automatizada, não um workspace. HML fica documentado como opc
 | Target | Workspace | `catalog` | Modo |
 |---|---|---|---|
 | `dev` | `{{WS_DEV}}` (profile `{{WS_DEV}}`) | `food_dev` | `development` (prefixo `[dev <usuário>]`) |
-| `prod` | `{{WS_PROD}}` (profile `{{WS_PROD}}`) | `food_prod` | `production`: pasta `/Workspace/Projects/...`, permissões de *Can view* para `data-engineering`, `CAN_MANAGE` para `platform-admins` |
+| `prod` | `{{WS_PROD}}` (profile `{{WS_PROD}}`) | `food_prod` (nunca o automático do workspace) | `production`: pasta `/Workspace/Projects/...`, permissões de *Can view* para `data-engineering`, `CAN_MANAGE` para `platform-admins` |
 
 Use a nomenclatura atual (Declarative Automation Bundles / Asset Bundles) e a skill `databricks-dabs`.
 
@@ -49,3 +49,4 @@ Um exemplo **documentado, sem executar** de GitHub Actions com service principal
 - [ ] Engenharia só com *Can view* no job de PROD.
 - [ ] Marketing lê a Gold de PROD e recebe `PERMISSION_DENIED` na Silver.
 - [ ] Exemplo de CI/CD documentado.
+- [ ] Nenhum arquivo, consulta ou recurso do projeto usa o catálogo automático (`{{WS_DEV}}`/`{{WS_PROD}}` com `_`); tudo é `food_<ambiente>` em três partes (PRD 00, seção 3.1).

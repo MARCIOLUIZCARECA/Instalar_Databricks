@@ -18,7 +18,7 @@ DATABRICKS_PROFILE: ""        # profile do CLI com login de CONTA (accounts.clou
 NOME_DA_CONTA: ""             # o nome dado no cadastro (aparece no topo do Account Console)
 
 # Workspace DEV, criado à mão no Bloco 2 (manual, seções 2 a 6)
-WS_DEV: "dev-food"            # nome do workspace (também usado como nome do profile)
+WS_DEV: ""                    # nome do workspace DEV (também o nome do profile). O catálogo automático dele = este nome com "_"
 WS_DEV_URL: ""                # https://dbc-....cloud.databricks.com
 DEV_ROOT_BUCKET: ""           # bucket raiz usado no DEV
 DEV_STORAGE_ROLE: ""          # storage role usada no DEV
@@ -26,6 +26,10 @@ DEV_CROSS_ACCOUNT_ROLE: ""    # cross-account role usada no DEV
 METASTORE: ""                 # metastore do DEV (ex.: metastore_aws_us_east_2)
 
 # O que vamos criar
-WS_PROD: "prod-food"          # nome do workspace de produção (também o nome do profile)
+WS_PROD: ""                   # nome do workspace PROD a criar. Sugestão: <PREFIXO>-prod. Evite "prod-food": o catálogo automático vira prod_food, fácil de confundir com food_prod
 PREFIXO: ""                   # curto, minúsculo, sem espaço (ex.: coca, ana, turma1). Entra no nome de buckets e roles novos
 EMAIL_BASE: ""                # e-mail para os usuários fictícios com +alias (ex.: voce@gmail.com → voce+engenheiro@gmail.com)
+
+# Catálogos do projeto (fixos; o PRD 02 cria). NUNCA use o catálogo automático do workspace (PRD 00, seção 3.1).
+CATALOGO_DEV: "food_dev"
+CATALOGO_PROD: "food_prod"

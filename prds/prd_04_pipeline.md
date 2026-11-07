@@ -48,3 +48,4 @@ O passo 5 é o momento da aula: *"a tabela é um arquivo no bucket da empresa; o
 - [ ] As 3 tabelas em `food_dev.orders`, com a Gold só com pedidos entregues.
 - [ ] `DESCRIBE DETAIL` aponta para `s3://{{PREFIXO}}-food-lakehouse-{{AWS_ACCOUNT_ID}}/dev/...`.
 - [ ] Nenhum catálogo fixo no código.
+- [ ] Nenhum arquivo, consulta ou recurso do projeto usa o catálogo automático (`{{WS_DEV}}`/`{{WS_PROD}}` com `_`); tudo é `food_<ambiente>` em três partes (PRD 00, seção 3.1).

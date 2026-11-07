@@ -1,0 +1,27 @@
+# Configuração do aluno · versão SEM AWS (Express setup).
+#
+# Você só precisa de uma conta Databricks criada pelo cadastro Express
+# (login.databricks.com/signup). Não há conta AWS, bucket, role nem VPC para criar.
+#
+# Quem preenche: o Claude Code, no início do PRD 01 (passo 0). Ele descobre o que der,
+# só com leitura (databricks current-user me, catalogs list, warehouses list), mostra a
+# tabela e pede para você confirmar antes de gravar aqui. Os PRDs usam estes valores
+# como {{NOME}}. Deixe vazio o que você não souber.
+#
+# Sem < > nos valores: só o texto.
+
+# Workspace Express (o único que vamos usar)
+WS: ""                        # nome do profile do CLI para o workspace (ex.: food)
+WS_URL: ""                    # https://dbc-....cloud.databricks.com
+WS_CATALOGO_AUTOMATICO: ""    # catálogo que a Databricks criou junto com o workspace (NÃO usado no projeto)
+REGIAO: ""                    # região do workspace Express (só informativo; não escolhemos)
+WAREHOUSE_ID: ""              # SQL warehouse serverless que vem no Express (ex.: "Serverless Starter Warehouse")
+
+# Quem é você
+USUARIO: ""                   # seu e-mail de login na Databricks
+EMAIL_BASE: ""                # e-mail para os usuários fictícios com +alias (ex.: voce@gmail.com → voce+engenheiro@gmail.com)
+DATABRICKS_ACCOUNT_PROFILE: "" # opcional: profile com login de CONTA (accounts.cloud.databricks.com), se a sua conta permitir
+
+# Catálogos do projeto (fixos; o PRD 02 cria). NUNCA use o catálogo automático do workspace (PRD 00, seção 3.1).
+CATALOGO_DEV: "food_dev"
+CATALOGO_PROD: "food_prod"

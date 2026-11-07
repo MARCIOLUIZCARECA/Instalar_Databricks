@@ -2,7 +2,7 @@
 
 **Para quem lê:** o Claude Code. Leia antes o `prd_00_contexto.md` desta pasta.
 
-**Pré-requisito:** `food_prod.orders.gold_sales_by_store` preenchida (PRD 05) e o SQL warehouse serverless `{{WAREHOUSE_ID}}`.
+**Pré-requisito:** `food_prod.orders.gold_sales_by_store` preenchida (PRD 05) e o SQL warehouse serverless `{{WAREHOUSE_ID_PROD}}`, do workspace `{{WS_PROD}}`.
 
 **Mensagem da aula:** *"a mesma Gold, três experiências; outra interface não é outra porta"*.
 
@@ -20,7 +20,7 @@ Três formas de consumo, no target `prod`, todas lendo **a mesma tabela Gold**, 
 
 ## 2. O que construir (tudo no bundle, target `prod`)
 
-**Dashboard "Food Intelligence — Executive Overview"** (skill `databricks-aibi-dashboards`), no warehouse `{{WAREHOUSE_ID}}`:
+**Dashboard "Food Intelligence — Executive Overview"** (skill `databricks-aibi-dashboards`), no warehouse `{{WAREHOUSE_ID_PROD}}`:
 - KPIs: faturamento, pedidos, ticket médio, número de lojas.
 - Gráficos: faturamento por dia, por região, ranking de lojas, pedidos por período, ticket médio por loja.
 - Filtros: período, estado, cidade, loja.

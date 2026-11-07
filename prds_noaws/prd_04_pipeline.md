@@ -27,7 +27,7 @@ O catálogo **não é fixo no código**: vem por parâmetro (`catalog`, padrão 
 | `notebooks/05_validate.py` | Checagens que **bloqueiam a promoção**: sem duplicados na Silver, sem receita negativa, Gold não vazia, soma da Gold = soma dos entregues na Silver | — |
 
 - As regras da Silver ficam em **`src/food/transforms.py`** (funções puras), com testes em **`tests/test_transforms.py`** rodando localmente sem Databricks (`pytest`).
-- Um **job** (`food_orders_pipeline`) com as 5 tarefas em sequência, em **compute serverless** (o Express só tem serverless), definido no bundle (`databricks.yml`, target `dev` apontando para o profile `{{WS}}`). Use a skill `databricks-jobs`.
+- Um **job** (`food_orders_pipeline`) com as 5 tarefas em sequência, em **compute serverless** (o Express só tem serverless), definido no bundle (`databricks.yml`, target `dev` apontando para o profile `{{WS_DEV}}`; o target `prod` vem no PRD 05). Use a skill `databricks-jobs`.
 - Use `_metadata.file_path` (não `input_file_name()`), que é o compatível com serverless.
 
 ## 3. Passo a passo
@@ -48,4 +48,4 @@ O passo 4 é o momento da aula. Na versão AWS, abríamos o bucket e víamos `_d
 - [ ] Job em DEV verde, incluindo o `05_validate`, em serverless.
 - [ ] As 3 tabelas em `food_dev.orders`, com a Gold só com pedidos entregues.
 - [ ] Nenhum catálogo fixo no código; nenhum `s3://`.
-- [ ] Nenhum arquivo, consulta ou recurso usa o catálogo automático (`{{WS_CATALOGO_AUTOMATICO}}`); tudo é `food_<ambiente>` em três partes.
+- [ ] Nenhum arquivo, consulta ou recurso usa um catálogo automático (`{{CATALOGO_AUTOMATICO_DEV}}`, `{{CATALOGO_AUTOMATICO_PROD}}`); tudo é `food_<ambiente>` em três partes.

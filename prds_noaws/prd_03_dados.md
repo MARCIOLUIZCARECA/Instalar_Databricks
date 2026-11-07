@@ -2,7 +2,7 @@
 
 **Para quem lê:** o Claude Code. Leia antes o `prd_00_contexto.md` desta pasta.
 
-**Pré-requisito:** volumes `food_dev.orders.raw` e `food_prod.orders.raw` (PRD 01).
+**Pré-requisito:** volumes `food_dev.orders.raw` (no `{{WS_DEV}}`) e `food_prod.orders.raw` (no `{{WS_PROD}}`), do PRD 01.
 
 **Mensagem da aula:** *"o arquivo bruto chega ao lake da empresa, e o Databricks lê de lá"*. Na versão com AWS, o lake é um bucket S3; aqui, é um **volume** do Unity Catalog no storage gerenciado.
 
@@ -33,15 +33,15 @@ order_id, store_id, order_date, product_name, quantity, total_amount, order_stat
   - nulos em `quantity` ou `product_name`;
   - status em maiúsculas ou com espaço.
 
-**`data/upload_to_volume.sh <env> <profile>`**: envia os dois CSVs para `/Volumes/food_<env>/orders/raw/` com `databricks fs cp --overwrite dbfs:/Volumes/food_<env>/orders/raw/... --profile <profile>`. Valida que `<env>` é `dev` ou `prod`.
+**`data/upload_to_volume.sh <env> <profile>`**: envia os dois CSVs para `/Volumes/food_<env>/orders/raw/` com `databricks fs cp --overwrite dbfs:/Volumes/food_<env>/orders/raw/... --profile <profile>`. Valida que `<env>` é `dev` ou `prod`. O profile acompanha o ambiente: `dev` → `{{WS_DEV}}`, `prod` → `{{WS_PROD}}` (cada volume só existe no seu workspace).
 
 ## 3. Passo a passo
 
 | # | Passo | Onde ver |
 |---|---|---|
 | 1 | Gerar os CSVs e mostrar 5 linhas de cada, apontando a sujeira | Terminal |
-| 2 | Enviar para `dev` e `prod` (aprovação antes) | Catalog Explorer → `food_dev.orders.raw` |
-| 3 | Listar pelo SQL: `LIST '/Volumes/food_dev/orders/raw/'` e ler 5 linhas com `read_files` | SQL Editor |
+| 2 | Enviar para `dev` (`{{WS_DEV}}`) e `prod` (`{{WS_PROD}}`), com aprovação antes | Catalog Explorer de cada workspace → `food_<env>.orders.raw` |
+| 3 | Listar pelo SQL em cada workspace: `LIST '/Volumes/food_dev/orders/raw/'` (DEV), o mesmo para `food_prod` (PROD), e ler 5 linhas com `read_files` | SQL Editor |
 
 **Plano B** se o CLI falhar no upload: no Catalog Explorer, abrir o volume → *Upload to this volume* e arrastar os dois CSVs.
 

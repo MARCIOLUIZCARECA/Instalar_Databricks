@@ -44,7 +44,7 @@ Ordem de uso, do zero até a aula. Cada comando tem detalhes no README da pasta.
 
 | # | Para quê | Comando |
 |---|---|---|
-| 0 | Logins (conta Databricks e AWS) | `databricks auth login --host https://accounts.cloud.databricks.com --account-id <ID> --profile workshop-account` · `aws login --profile <profile> --region us-east-2` ([manual 0.1](manual/README.md#01-login-pelo-terminal-cli)) |
+| 0 | Logins (conta Databricks e AWS) | `databricks auth login --host https://accounts.cloud.databricks.com --account-id <ID> --profile workshop-account` · `aws login --profile <profile> --region us-east-2` ([manual, seção 7](manual/README.md#7-login-pelo-terminal-e-claude-code)) |
 | 1 | Policies preenchidas para o setup **manual** | `python3 manual/policies/gerar_policies.py --aws <AWS_ID> --databricks <DBX_ID> --prefix workshop` → `manual/policies/prontas/<AWS_ID>/COLAR.md` |
 | 2 | Workspaces DEV e PROD **por código** | `cd terraform && terraform init && terraform plan && terraform apply` |
 | 3 | Login em cada workspace | `databricks auth login --host <url> --profile food-dev` (e `food-prod`) |

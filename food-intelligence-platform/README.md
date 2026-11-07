@@ -35,7 +35,7 @@ A infraestrutura nasce **completa** (DEV e PROD). O código nasce **só em DEV**
 
 | # | Etapa | Onde | Comando / guia |
 |---|---|---|---|
-| 0 | Logins (conta Databricks + AWS) | terminal | [manual, seção 0.1](../manual/README.md#01-login-pelo-terminal-cli) |
+| 0 | Logins (conta Databricks + AWS) | terminal | [manual, seção 7](../manual/README.md#7-login-pelo-terminal-e-claude-code) |
 | 1 | Workspaces FOOD-DEV e FOOD-PROD | [`../terraform`](../terraform/README.md) | `terraform apply` · [docs/workspaces.md](docs/workspaces.md) |
 | 2 | Login em cada workspace | terminal | `databricks auth login --host <url> --profile food-dev` (e food-prod) |
 | 3 | Buckets raw/lakehouse, grupos, usuários, catálogos, permissões | [`infrastructure/terraform`](infrastructure/terraform) | `terraform apply` · [docs/governance.md](docs/governance.md) |

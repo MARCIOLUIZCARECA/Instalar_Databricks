@@ -1,0 +1,26 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+      "Resource": [
+        "arn:aws:s3:::food-intelligence-raw-928844615034/*",
+        "arn:aws:s3:::food-intelligence-lakehouse-928844615034/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket", "s3:GetBucketLocation"],
+      "Resource": [
+        "arn:aws:s3:::food-intelligence-raw-928844615034",
+        "arn:aws:s3:::food-intelligence-lakehouse-928844615034"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["sts:AssumeRole"],
+      "Resource": ["arn:aws:iam::928844615034:role/food-intelligence-uc-role"]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "_como_usar": "Só se a conta AWS estiver numa AWS Organization com a RCP ManagedAccountResourceControlPolicy. Na Management Account: Organizations > Policies > Resource control policies > ManagedAccountResourceControlPolicy > Edit. Na regra DenyAnyoneOutsideMyOrgAndAWS, dentro de Condition, acrescente o bloco abaixo (sem esta linha _como_usar).",
+  "StringNotEquals": {
+    "aws:PrincipalAccount": "414351767826"
+  }
+}

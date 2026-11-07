@@ -139,7 +139,7 @@ Pontos para explicar:
 - `for_each`: um bloco, um workspace por ambiente.
 - **State**: o Terraform lembra o que criou (`terraform destroy` desfaz tudo).
 - **Dois stacks**: infraestrutura (o "prédio") × governança (a "portaria"). Mostrar [`../infrastructure/terraform`](../infrastructure/terraform).
-- Login de conta × login de workspace ([manual 0.1](../../manual/README.md#01-login-pelo-terminal-cli)).
+- Login de conta × login de workspace ([manual, seção 7](../../manual/README.md#7-login-pelo-terminal-e-claude-code)).
 
 Fechar mostrando FOOD-DEV e FOOD-PROD `RUNNING` no Account Console ("rodei ontem com este mesmo código; leva ~15 min").
 

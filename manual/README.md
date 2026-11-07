@@ -10,6 +10,20 @@ Este manual acompanha a **Etapa 2 (preparar a AWS)** e a **Etapa 3 (configurar o
 
 ## 0. Antes de começar
 
+### Passo zero: criar a conta Databricks
+
+1. Abra <https://login.databricks.com/signup> (é para onde leva o botão "Try Databricks" do site).
+2. Escolha **Work → Start a trial**: 14 dias e US$ 400 em créditos, plataforma completa. **Não** escolha *Personal (Free Edition)*: ela não tem Account Console, e sem ele não dá para criar o workspace clássico nem grupos.
+3. **Name your account:** em geral, o nome da empresa (aparece no topo do Account Console). **Cloud provider:** **AWS**. **Continue**.
+4. A Databricks cria sozinha a conta e um workspace **serverless** chamado `workspace` (é o "Express"), com um metastore na região padrão. No ensaio de 07/11 foi **`us-west-2` (Oregon)**, não Ohio. Isso não atrapalha: os workspaces clássicos do workshop ficam em `us-east-2` e terão o metastore dessa região.
+5. O workspace pode levar **alguns minutos** para aparecer em **Account Console → Workspaces**. Lista vazia logo depois do cadastro é normal: espere e recarregue.
+6. Copie o **Databricks Account ID**: Account Console → clique no **avatar** (canto superior direito) → *Account ID*. Formato `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`.
+
+**Quando o trial acabar** (14 dias ou fim dos créditos), a conta só precisa de uma forma de pagamento; nada é recriado:
+
+- **Cartão de crédito:** Account Console → **Settings**. A Databricks cobra direto.
+- **AWS Marketplace:** produto *Databricks Data Intelligence Platform* → **Subscribe** → ligar à account. A cobrança vai para a fatura da AWS. Testado no ensaio: **não cria workspace novo**; é só o meio de pagamento.
+
 **Você vai precisar de:**
 
 - Uma conta AWS **no plano pago** (cartão cadastrado), em que você possa criar IAM roles e buckets S3. O *Free plan* das contas AWS novas limita serviços e créditos, e o workspace clássico cria recursos cobrados por hora (NAT Gateway, EC2). Veja [Quanto custa](#quanto-custa).
@@ -28,7 +42,7 @@ Este manual acompanha a **Etapa 2 (preparar a AWS)** e a **Etapa 3 (configurar o
 | `NOME_DA_STORAGE_ROLE` | `databricks-workshop-storage-role` | você escolhe (passo 4) |
 | Nome da cross-account role | `databricks-workshop-cross-account-role` | você escolhe (passo 5) |
 
-As policies em JSON estão na pasta [`policies/`](policies/), com os textos entre `< >` para trocar pelos seus valores.
+As policies em JSON estão na pasta [`policies/`](policies/), com os textos entre `< >` para trocar pelos seus valores. **Troque o texto e apague os `< >` junto:** `arn:aws:s3:::<NOME_DO_BUCKET>` vira `arn:aws:s3:::meu-bucket`, não `arn:aws:s3:::<meu-bucket>`.
 
 **Atalho: policies já preenchidas, prontas para copiar e colar.** Rode, com os seus valores:
 
@@ -36,95 +50,16 @@ As policies em JSON estão na pasta [`policies/`](policies/), com os textos entr
 python3 manual/policies/gerar_policies.py --aws <AWS_ACCOUNT_ID> --databricks <DATABRICKS_ACCOUNT_ID> --prefix workshop
 ```
 
-Ele cria `manual/policies/prontas/<AWS_ACCOUNT_ID>/COLAR.md`: cada policy na ordem do manual, com o lugar exato do console onde colar, os nomes das roles e o JSON pronto. As da conta do ensaio estão em [`policies/prontas/928844615034/COLAR.md`](policies/prontas/928844615034/COLAR.md).
+Ele cria `manual/policies/prontas/<AWS_ACCOUNT_ID>/COLAR.md`: cada policy na ordem do manual, com o lugar exato do console onde colar, os nomes das roles e o JSON pronto. As da conta do ensaio estão em [`policies/prontas/928844615034/COLAR.md`](policies/prontas/928844615034/COLAR.md). As do **ao vivo** (conta Databricks nova, prefixo `coca`, nomes que não colidem com o ensaio) estão em [`policies/prontas/928844615034-coca/COLAR.md`](policies/prontas/928844615034-coca/COLAR.md).
+
+> **Montando de novo numa conta AWS que já foi usada? Não reaproveite bucket nem roles.** No ensaio de 07/11, a conta Databricks era nova, mas a conta AWS era a mesma do ensaio anterior. As roles antigas foram reaproveitadas e a criação do workspace falhou com `Storage credential IAM role ... doesn't have access to S3 bucket`, por dois resíduos:
+>
+> 1. a **trust policy** ainda tinha o External ID da conta Databricks **antiga**;
+> 2. a **permissão de S3** da storage role ainda apontava para o bucket **antigo**.
+>
+> **Regra:** conta Databricks nova = **prefixo novo** no gerador (`--prefix coca`, por exemplo). Ele gera nomes novos para bucket e roles (`databricks-coca-root-<AWS_ACCOUNT_ID>`, `databricks-coca-storage-role`, `databricks-coca-cross-account-role`), e nada colide com o que já existe. Se precisar reaproveitar uma role, confira **as três coisas** antes: External ID nas duas trust policies, bucket na policy de S3 da storage role e Databricks Account ID na bucket policy.
 
 > Vai montar numa conta nova? Leia antes o checklist de lições do ensaio: [`food-intelligence-platform/docs/troubleshooting.md`](../food-intelligence-platform/docs/troubleshooting.md) (Organization com SCP/RCP, limite diário de workspaces, catálogo automático, SQL serverless).
-
-### 0.1 Login pelo terminal (CLI)
-
-Só é necessário se você for automatizar (Terraform, scripts, criar os workspaces DEV/HML/PROD por código). Pelo console, basta o navegador.
-
-Existem **dois tipos de login** na Databricks, e eles não se substituem:
-
-| Login | Host | Serve para |
-|---|---|---|
-| **Conta** (account) | `https://accounts.cloud.databricks.com` | Criar workspaces, credenciais, storage, grupos e usuários, e atribuir quem acessa qual workspace |
-| **Workspace** | `https://dbc-xxxx.cloud.databricks.com` | Trabalhar *dentro* de um workspace que já existe: catálogos, notebooks, jobs, clusters |
-
-**Uma conta, vários workspaces.** A conta Databricks é o "guarda-chuva": ela pode ter vários workspaces (aqui, FOOD-DEV e FOOD-PROD). O seu **usuário** também é um só, cadastrado na conta, e pode ser atribuído a quantos workspaces o admin quiser. É assim que alguém tem acesso a DEV e não a PROD: o mesmo usuário, atribuído só ao workspace de DEV.
-
-No CLI a lógica é a mesma:
-
-- O **profile de conta** (`workshop-account`) enxerga e administra **todos** os workspaces da conta.
-- Cada **profile de workspace** aponta para **um** workspace só. Para trabalhar nos dois, você cria dois profiles (`food-dev` e `food-prod`), os dois com o mesmo usuário (passo 5 abaixo).
-
-Um workspace não cria outro workspace. Por isso, para criar FOOD-DEV e FOOD-PROD, você precisa do **login de conta**, e o seu usuário precisa ser **account admin**.
-
-**1. Instalar o Databricks CLI** (versão nova, `>= 0.200`; o pacote antigo do `pip` não serve):
-
-```bash
-brew tap databricks/tap && brew install databricks   # macOS
-databricks version
-```
-
-No Windows/Linux, siga <https://docs.databricks.com/aws/en/dev-tools/cli/install>.
-
-**Asset Bundles (DABs) já vêm no CLI.** Não há nada separado para instalar: os bundles são o comando `databricks bundle`, que vamos usar para promover código de DEV para PROD. Para conferir:
-
-```bash
-databricks bundle --help
-```
-
-**(Opcional) Skills da Databricks para o agente de IA.** Se você usa Claude Code, Cursor, Codex ou outro agente de código, o próprio CLI instala as skills oficiais da Databricks (fonte: <https://github.com/databricks/databricks-agent-skills>). Elas ensinam o agente a usar bundles, jobs, Unity Catalog etc. do jeito certo. Rode na pasta do projeto:
-
-```bash
-databricks aitools install --agents claude-code --scope project --skills-only
-databricks aitools list        # confere o que foi instalado
-```
-
-- `--scope project` grava as skills dentro do projeto (`.claude/skills/`), então elas vão junto com o repositório. Sem essa opção, a instalação é global (vale para todos os projetos).
-- `--agents` escolhe o agente: `claude-code`, `cursor`, `codex` etc. Sem a opção, o CLI pergunta.
-- Para atualizar depois: `databricks aitools update`.
-
-**2. Login na conta Databricks:**
-
-```bash
-databricks auth login \
-  --host https://accounts.cloud.databricks.com \
-  --account-id <DATABRICKS_ACCOUNT_ID> \
-  --profile workshop-account
-```
-
-O navegador abre, você entra com o usuário admin da conta e autoriza. O CLI grava um profile chamado `workshop-account` em `~/.databrickscfg`, sem senha nem token em texto: o login é OAuth e o token se renova sozinho.
-
-**3. Conferir se funcionou:**
-
-```bash
-databricks auth profiles                                  # workshop-account deve aparecer com Valid = YES
-databricks account workspaces list --profile workshop-account
-```
-
-Se o segundo comando listar os workspaces da conta (ou devolver `[]` numa conta nova), o login está ok.
-
-**4. Login na AWS** (o Terraform também cria bucket e IAM roles):
-
-```bash
-aws sso login --profile <SEU_PROFILE_AWS>        # ou: aws configure --profile <SEU_PROFILE_AWS>
-aws sts get-caller-identity --profile <SEU_PROFILE_AWS>
-```
-
-O `Account` retornado deve ser o seu `AWS_ACCOUNT_ID`.
-
-**5. (Depois que os workspaces existirem) login em cada workspace:**
-
-```bash
-databricks auth login --host https://<deployment-do-FOOD-DEV>.cloud.databricks.com  --profile food-dev
-databricks auth login --host https://<deployment-do-FOOD-PROD>.cloud.databricks.com --profile food-prod
-```
-
-A URL de cada workspace aparece no Account Console → **Workspaces**, ou no campo `deployment_name` do comando `databricks account workspaces list`.
-
-> **Erros comuns:** `cannot configure default credentials` significa que faltou o `--profile` no comando. `PERMISSION_DENIED` no login de conta significa que o seu usuário não é account admin. Se o token expirar, rode o mesmo `databricks auth login` de novo.
 
 ---
 
@@ -251,6 +186,49 @@ No storage manual, a Databricks pede o **nome do bucket** (passo 2) e o **ARN da
 ![Aba Permissions do bucket](prints/14-s3-aba-permissions.jpg)
 
 Cole o JSON com seus valores no lugar de `<NOME_DO_BUCKET>` e `<DATABRICKS_ACCOUNT_ID>`:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Grant Databricks Access",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::414351767826:root"
+      },
+      "Action": [
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:ListBucket",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": ["arn:aws:s3:::<NOME_DO_BUCKET>/*", "arn:aws:s3:::<NOME_DO_BUCKET>"],
+      "Condition": {
+        "StringEquals": {
+          "aws:PrincipalTag/DatabricksAccountId": ["<DATABRICKS_ACCOUNT_ID>"]
+        }
+      }
+    },
+    {
+      "Sid": "Prevent DBFS from accessing Unity Catalog metastore",
+      "Effect": "Deny",
+      "Principal": {
+        "AWS": "arn:aws:iam::414351767826:root"
+      },
+      "Action": ["s3:*"],
+      "Resource": ["arn:aws:s3:::<NOME_DO_BUCKET>/unity-catalog/*"]
+    }
+  ]
+}
+```
+
+- `<NOME_DO_BUCKET>` (aparece 3 vezes): o nome do bucket do passo 2, sem `s3://`.
+- `<DATABRICKS_ACCOUNT_ID>`: o ID da sua conta Databricks (Account Console → menu do avatar).
+- `414351767826` é a conta AWS **da Databricks**. Não troque.
+- **Apague também os `< >`.** Certo: `arn:aws:s3:::meu-bucket`. Errado: `arn:aws:s3:::<meu-bucket>`. Se sobrar um `<` ou `>`, a AWS recusa com `Policy has invalid resource`.
 
 ![Bucket policy colada](prints-v2/02-s3-bucket-policy-colada.jpg)
 
@@ -401,7 +379,7 @@ Agora voltamos à tela do passo 1 e preenchemos cada bloco com o que criamos na 
 ### 6.1 Basics
 
 - **Workspace name:** `workshop-aws` (vira parte da URL).
-- **Region:** **Ohio (`us-east-2`)**, a mesma do bucket.
+- **Region:** **Ohio (`us-east-2`)**, a mesma do bucket. **Confira:** o formulário pode abrir com outra região já selecionada (no ensaio veio *São Paulo (sa-east-1)*). Bucket, roles e workspace precisam estar na mesma região, e numa Organization a SCP pode bloquear EC2 fora de `us-east-2`.
 - **Storage and compute:** *Use your existing cloud account* → **Continue**.
 
 ![Create Workspace: nome, região e conta própria](prints-v2/24-databricks-create-workspace-modal.jpg)
@@ -463,6 +441,105 @@ No ensaio, levou cerca de 2 minutos para ficar **Running**:
 
 ---
 
+## 7. Login pelo terminal e Claude Code
+
+Até aqui foi tudo pelo navegador. O workspace **DEV** existe e você sabe para que serve cada peça. A partir daqui, o **PROD** e o resto da plataforma (governança, pipeline, promoção e consumo) são feitos com o **Claude Code**, a partir dos PRDs da pasta [`prds/`](../prds/README.md). Para isso, o terminal precisa estar logado na Databricks e na AWS.
+
+Existem **dois tipos de login** na Databricks, e eles não se substituem:
+
+| Login | Host | Serve para |
+|---|---|---|
+| **Conta** (account) | `https://accounts.cloud.databricks.com` | Criar workspaces, credenciais, storage, grupos e usuários, e atribuir quem acessa qual workspace |
+| **Workspace** | `https://dbc-xxxx.cloud.databricks.com` | Trabalhar *dentro* de um workspace que já existe: catálogos, notebooks, jobs, clusters |
+
+**Uma conta, vários workspaces.** A conta Databricks é o "guarda-chuva": ela tem vários workspaces (aqui, DEV e PROD). O seu **usuário** também é um só, cadastrado na conta, e pode ser atribuído a quantos workspaces o admin quiser. É assim que alguém tem acesso a DEV e não a PROD: o mesmo usuário, atribuído só ao workspace de DEV.
+
+No CLI a lógica é a mesma:
+
+- O **profile de conta** enxerga e administra **todos** os workspaces da conta.
+- Cada **profile de workspace** aponta para **um** workspace só: um profile para o DEV e outro para o PROD, os dois com o mesmo usuário.
+
+Um workspace não cria outro workspace. Por isso, para criar o PROD, você precisa do **login de conta**, e o seu usuário precisa ser **account admin**.
+
+**1. Instalar o Databricks CLI** (versão nova, `>= 0.200`; o pacote antigo do `pip` não serve):
+
+```bash
+brew tap databricks/tap && brew install databricks   # macOS
+databricks version
+```
+
+No Windows/Linux, siga <https://docs.databricks.com/aws/en/dev-tools/cli/install>.
+
+**Asset Bundles (DABs) já vêm no CLI.** Não há nada separado para instalar: os bundles são o comando `databricks bundle`, que vamos usar para promover código de DEV para PROD. Para conferir:
+
+```bash
+databricks bundle --help
+```
+
+**Skills da Databricks para o Claude Code.** Elas ensinam o agente a usar bundles, jobs, Unity Catalog etc. do jeito certo (fonte: <https://github.com/databricks/databricks-agent-skills>). Rode na pasta do projeto:
+
+```bash
+databricks aitools install --agents claude-code --scope project --skills-only
+databricks aitools list        # confere o que foi instalado
+```
+
+- `--scope project` grava as skills dentro do projeto (`.claude/skills/`), então elas vão junto com o repositório. Sem essa opção, a instalação é global.
+- Alternativa: ligar o plugin oficial `databricks@claude-plugins-official` no `.claude/settings.json` do projeto.
+- Para atualizar depois: `databricks aitools update`.
+
+**2. Login na conta Databricks** (troque o ID e escolha um nome para o profile):
+
+```bash
+databricks auth login \
+  --host https://accounts.cloud.databricks.com \
+  --account-id SEU_DATABRICKS_ACCOUNT_ID \
+  --profile workshop-account
+```
+
+O navegador abre, você entra com o usuário admin da conta e autoriza. O CLI grava o profile em `~/.databrickscfg`, sem senha nem token em texto: o login é OAuth e o token se renova sozinho.
+
+**3. Conferir se funcionou:**
+
+```bash
+databricks auth profiles                                  # o profile deve aparecer com Valid = YES
+databricks account workspaces list --profile workshop-account
+```
+
+O segundo comando tem que listar os seus workspaces: o serverless do cadastro e o DEV.
+
+**4. Criar o profile da AWS e fazer login** (o Claude Code também cria bucket e IAM roles):
+
+Um **profile** é um apelido, salvo no seu computador (`~/.aws/config`), para um login da AWS. Ele não existe na conta AWS: é você quem cria, e o nome é você quem escolhe. Neste workshop, o profile se chama **`aovivo`**.
+
+```bash
+aws login --profile aovivo --region us-east-2         # cria o profile e faz o login (o navegador abre)
+aws configure set region us-east-2 --profile aovivo   # grava a região no profile (evita o erro NoRegion)
+aws sts get-caller-identity --profile aovivo          # confere em qual conta você entrou
+```
+
+- No navegador, entre na conta AWS do workshop e autorize. O `Account` retornado pelo último comando deve ser o seu `AWS_ACCOUNT_ID`. Se tiver mais de uma conta AWS aberta no navegador, confira se o login pegou a certa.
+- **Expirou?** Rode o mesmo `aws login --profile aovivo` de novo (o erro é `InvalidClientTokenId`).
+- **Quais profiles eu já tenho?** `aws configure list-profiles`.
+- O `aws login` é recente no AWS CLI v2. Se a sua versão não tiver o comando, atualize o CLI ou use `aws configure sso --profile aovivo` (IAM Identity Center). Último recurso: `aws configure --profile aovivo` com Access Key de um usuário IAM, o caminho menos seguro.
+
+**5. Login no workspace DEV** (o profile com o mesmo nome do workspace, que é o que os PRDs esperam):
+
+```bash
+databricks auth login --host https://dbc-xxxx.cloud.databricks.com --profile dev-food
+```
+
+A URL aparece no Account Console → **Workspaces**, ou no campo `deployment_name` do `databricks account workspaces list`. O login no PROD vem depois, no último passo do PRD 01, quando ele existir.
+
+**6. Começar com o Claude Code.** Copie a pasta [`prds/`](../prds/README.md) para a raiz do projeto, abra o Claude Code ali e peça:
+
+> Leia `prds/prd_00_contexto.md` e `prds/prd_01_workspace_prod.md` e vamos executar juntos, passo a passo.
+
+O primeiro passo preenche o `prds/config.yaml` com os **seus** valores (conta AWS, conta Databricks, nomes do DEV), só com leitura, e pede confirmação antes de gravar. Depois, um PRD por etapa.
+
+> **Erros comuns:** `cannot configure default credentials` significa que faltou o `--profile` no comando. `PERMISSION_DENIED` no login de conta significa que o seu usuário não é account admin. `NoRegion` na AWS significa que o profile está sem região (rode o `aws configure set region`). `InvalidClientTokenId` significa que o login da AWS expirou: faça o login de novo. Se o token da Databricks expirar, rode o mesmo `databricks auth login`.
+
+---
+
 ## Quanto custa
 
 Valores de referência da AWS em `us-east-2` (Ohio), sem impostos. Confira a página de preços da AWS antes do workshop, porque os valores mudam.
@@ -511,6 +588,9 @@ Faça no mesmo dia do workshop, **nesta ordem** (o workspace usa as roles, entã
 | Erro ao salvar a storage configuration | Nome do bucket com `s3://`, bucket em outra região, bucket policy com Account ID errado, ou trust da storage role ainda na versão provisória (`0000`) | Revise os passos 2, 3 e 4.4. |
 | Workspace fica em **Failed** | Falta de permissão EC2 na cross-account role, ou limite de VPC / Elastic IP da conta AWS atingido na região | Veja a mensagem no Account Console; confira a policy do passo 5.2 e os limites (*Service Quotas*) de VPC e Elastic IP em `us-east-2`. |
 | A política do bucket não salva (*Errors* > 0) | Algum `< >` ficou sem trocar no JSON | Troque `<NOME_DO_BUCKET>` e `<DATABRICKS_ACCOUNT_ID>` e valide de novo. |
+| `Unknown Error` / `Policy has invalid resource` ao salvar a bucket policy | Os `< >` ficaram no JSON (`arn:aws:s3:::<meu-bucket>`) ou o nome do bucket na policy não é o do bucket que você está editando | Apague os `< >` e confira o nome nas **3** linhas `arn:aws:s3:::` (uma está no `Deny`, lá embaixo). |
+| `MALFORMED_REQUEST: Storage credential IAM role arn:aws:iam::...:role/<storage-role> doesn't have access to S3 bucket <bucket>` ao criar o workspace | Role **reaproveitada** de uma montagem anterior: (1) trust com o External ID de **outra** conta Databricks (ou ainda `0000`); (2) policy de S3 da role apontando para **outro** bucket. Menos comum: bucket com SSE-KMS ou em outra região | IAM → Roles → storage role: aba **Trust relationships** (External ID = o **seu** Databricks Account ID) e aba **Permissions** (o bucket certo nas 2 linhas `arn:aws:s3:::`). Salve, espere 1 minuto, **feche e reabra** o formulário e crie de novo. Para não acontecer: prefixo novo no gerador (veja o passo 0). |
+| A lista de **Workspaces** está vazia logo depois do cadastro | O workspace serverless criado no cadastro demora alguns minutos para aparecer | Espere 2 a 5 minutos e recarregue. Se continuar vazio, confira se você está no Account Console da conta certa (menu do avatar → Account ID). |
 
 ### Conta AWS dentro de uma Organization (SCP e RCP)
 

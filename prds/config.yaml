@@ -1,0 +1,31 @@
+# Configuração do aluno · cada um tem a sua conta AWS e a sua conta Databricks.
+#
+# Quem preenche: o Claude Code, no início do PRD 01 (passo 0). Ele descobre o que der,
+# só com leitura (aws sts, databricks account workspaces/metastores list), mostra a
+# tabela e pede para você confirmar antes de gravar aqui. Os PRDs usam estes valores
+# como {{NOME}}. Deixe vazio o que você não souber.
+#
+# Sem < > nos valores: só o texto.
+
+# Conta AWS
+AWS_ACCOUNT_ID: ""            # 12 dígitos · console AWS, canto superior direito
+AWS_PROFILE: "aovivo"         # profile do AWS CLI (manual, seção 7, passo 4: aws login --profile aovivo)
+REGIAO: "us-east-2"           # a mesma do workspace DEV; tudo fica nela
+
+# Conta Databricks
+DATABRICKS_ACCOUNT_ID: ""     # UUID · Account Console → avatar → Account ID
+DATABRICKS_PROFILE: ""        # profile do CLI com login de CONTA (accounts.cloud.databricks.com)
+NOME_DA_CONTA: ""             # o nome dado no cadastro (aparece no topo do Account Console)
+
+# Workspace DEV, criado à mão no Bloco 2 (manual, seções 2 a 6)
+WS_DEV: "dev-food"            # nome do workspace (também usado como nome do profile)
+WS_DEV_URL: ""                # https://dbc-....cloud.databricks.com
+DEV_ROOT_BUCKET: ""           # bucket raiz usado no DEV
+DEV_STORAGE_ROLE: ""          # storage role usada no DEV
+DEV_CROSS_ACCOUNT_ROLE: ""    # cross-account role usada no DEV
+METASTORE: ""                 # metastore do DEV (ex.: metastore_aws_us_east_2)
+
+# O que vamos criar
+WS_PROD: "prod-food"          # nome do workspace de produção (também o nome do profile)
+PREFIXO: ""                   # curto, minúsculo, sem espaço (ex.: coca, ana, turma1). Entra no nome de buckets e roles novos
+EMAIL_BASE: ""                # e-mail para os usuários fictícios com +alias (ex.: voce@gmail.com → voce+engenheiro@gmail.com)

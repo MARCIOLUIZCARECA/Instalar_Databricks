@@ -8,7 +8,7 @@ Uso:
     # rode de novo com o External ID que ela mostrou:
     python3 manual/policies/gerar_policies.py ... --external-id <ID>
 
-Saída: manual/policies/prontas/<AWS_ACCOUNT_ID>/
+Saída: manual/policies/prontas/<AWS_ACCOUNT_ID>/ (ou <AWS_ACCOUNT_ID>-<prefixo>/, se o prefixo não for "workshop")
     COLAR.md     guia na ordem do manual: onde colar cada policy, com o JSON pronto
     *.json       cada policy preenchida
 
@@ -104,7 +104,9 @@ def main() -> None:
         raise SystemExit("--databricks precisa ser um UUID")
 
     v = values(args)
-    out = HERE / "prontas" / args.aws
+    # Prefixo diferente do padrão ganha pasta própria, para não sobrescrever outra montagem
+    pasta = args.aws if args.prefix == "workshop" else f"{args.aws}-{args.prefix}"
+    out = HERE / "prontas" / pasta
     out.mkdir(parents=True, exist_ok=True)
 
     md = [f"# Policies prontas · conta AWS {v['AWS_ACCOUNT_ID']}\n",

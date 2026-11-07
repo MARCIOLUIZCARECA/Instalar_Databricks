@@ -13,7 +13,7 @@ Cada workspace tem a sua URL, os seus usuários atribuídos, as suas configuraç
 
 ## Criar (Terraform)
 
-Pré-requisito: logins da seção 0.1 do [manual](../../manual/README.md#01-login-pelo-terminal-cli).
+Pré-requisito: logins da seção 7 do [manual](../../manual/README.md#7-login-pelo-terminal-e-claude-code).
 
 ```bash
 cd ../terraform
